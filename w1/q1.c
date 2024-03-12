@@ -58,14 +58,11 @@ void quick_sort(node_t **list)
     int value;
     int i = 0;
     int max_level = 2 * n;
-    node_t *begin[max_level], *end[max_level];
+    node_t *begin[max_level];
     node_t *result = NULL, *left = NULL, *right = NULL;
-    
     begin[0] = *list;
-    end[0] = list_tail(list);
-            
     while (i >= 0) {
-        node_t *L = begin[i], *R = end[i];
+        node_t *L = begin[i], *R = list_tail(&begin[i]);
         if (L != R) {
             node_t *pivot = L;
             value = pivot->value;
@@ -77,14 +74,9 @@ void quick_sort(node_t **list)
                 p = p->next;
                 list_add(n->value > value ? &right : &left, n);
             }
-
             begin[i] = left;
-            end[i] = list_tail(&left);
             begin[i + 1] = pivot;
-            end[i + 1] = pivot;
             begin[i + 2] = right;
-            end[i + 2] = list_tail(&right);
-
             left = right = NULL;
             i += 2;
         } else {
