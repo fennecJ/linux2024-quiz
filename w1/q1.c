@@ -68,26 +68,36 @@ void quick_sort(struct list_head *list)
     struct list_head *head_record = list;
     begin[0] = list->next;
     list->prev->next = NULL;
+    begin[0]->prev = list->prev; // set a link to tail
     while (i >= 0) {
-        struct list_head *L = begin[i], *R = list_tail(begin[i]);
+        struct list_head *L = begin[i], *R = L ? L->prev : NULL;
         if (L != R) {
             struct list_head *pivot = L;
             value = list_entry(pivot, node_t, list)->value;
             struct list_head *p = pivot->next;
             pivot->next = NULL; // break the list
-    
+            struct list_head *rtail = NULL, *ltail = NULL;
             while (p) {
                 struct list_head *n = p;
                 p = p->next;
                 int n_value = list_entry(n, node_t, list)->value;
                 if(n_value > value) {
+                    if(!rtail)
+                        rtail = n;
                     n->next = right;
                     right = n;
                 } else {
+                    if(!ltail)
+                        ltail = n;
                     n->next = left;
                     left = n;
                 }
             }
+            if(right)
+                right->prev = rtail;
+            if(left)
+                left->prev = ltail;
+            pivot->prev = pivot;
 
             begin[i] = left;
             begin[i + 1] = pivot;
