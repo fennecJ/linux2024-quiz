@@ -225,3 +225,65 @@ void timsort(void *priv, struct list_head *head, list_cmp_func_t cmp)
     }
     merge_final(priv, cmp, head, stk1, stk0);
 }
+
+static inline size_t ilog2(size_t x){
+    return 31 - __builtin_clzl(x);
+}
+
+static inline size_t run_size_max(struct list_head* h1, struct list_head* h2){
+    return (run_size(h1) > run_size(h2)) ? run_size(h1) : run_size(h2);
+}
+
+static struct list_head *merge_collapse_ass(void *priv,
+                                        list_cmp_func_t cmp,
+                                        struct list_head *tp)
+{
+    int n;
+    while ((n = stk_size) >= 2) {
+        if (n >= 3 && 
+            ilog2(run_size(tp->prev->prev)) <= ilog2(run_size_max(tp->prev, tp))) {
+            tp->prev = merge_at(priv, cmp, tp->prev);
+        } else if (run_size(tp->prev) <= run_size(tp)) {
+            tp = merge_at(priv, cmp, tp);
+        } else {
+            break;
+        }
+    }
+
+    return tp;
+}
+
+void adaptive_ShiversSort(void *priv, struct list_head *head, list_cmp_func_t cmp)
+{
+    stk_size = 0;
+
+    struct list_head *list = head->next, *tp = NULL;
+    if (head == head->prev)
+        return;
+
+    /* Convert to a null-terminated singly-linked list. */
+    head->prev->next = NULL;
+
+    do {
+        /* Find next run */
+        struct pair result = find_run(priv, list, cmp);
+        result.head->prev = tp;
+        tp = result.head;
+        list = result.next;
+        stk_size++;
+        tp = merge_collapse_ass(priv, cmp, tp);
+    } while (list);
+
+    /* End of input; merge together all the runs. */
+    tp = merge_force_collapse(priv, cmp, tp);
+
+    /* The final merge; rebuild prev links */
+    struct list_head *stk0 = tp, *stk1 = stk0->prev;
+    while (stk1 && stk1->prev)
+        stk0 = stk0->prev, stk1 = stk1->prev;
+    if (stk_size <= 1) {
+        build_prev_link(head, head, stk0);
+        return;
+    }
+    merge_final(priv, cmp, head, stk1, stk0);
+}

@@ -108,6 +108,7 @@ int main(void)
 
     test_t tests[] = {
         {.name = "timsort", .impl = timsort},
+        {.name = "adaptive_ShiversSort", .impl = adaptive_ShiversSort},
         {NULL, NULL},
     };
     test_t *test = tests;
