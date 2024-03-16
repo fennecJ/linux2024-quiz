@@ -1,1 +1,2 @@
-#define SAMPLES 1023
+#define SAMPLES 1200
+#define EXP_CNT 1000

@@ -307,7 +307,6 @@ static inline size_t nodePower(struct list_head *h1, struct list_head *h2,
     return __builtin_clz(a ^ b);
 }
 
-static size_t prev_power = 0;
 static size_t pow_stack[100][2] = {0};
 
 static struct list_head *merge_collapse_power(void *priv,

@@ -5,7 +5,7 @@
 
 #include "list.h"
 #include "sort_impl.h"
-#include "timsort.c"
+#include "def.h"
 
 typedef struct {
     struct list_head list;
@@ -13,11 +13,12 @@ typedef struct {
     int seq;
 } element_t;
 
-#define SAMPLES 1000
+static int stats[3][EXP_CNT] = {0};
 
 static void create_sample(struct list_head *head, element_t *space, int samples)
 {
-    printf("Creating sample\n");
+    if(EXP_CNT == 1)
+        printf("Creating sample\n");
     for (int i = 0; i < samples; i++) {
         element_t *elem = space + i;
         elem->val = rand();
@@ -109,35 +110,53 @@ int main(void)
     test_t tests[] = {
         {.name = "timsort", .impl = timsort},
         {.name = "adaptive_ShiversSort", .impl = adaptive_ShiversSort},
+        {.name = "powerSort", .impl = power_sort},
         {NULL, NULL},
     };
-    test_t *test = tests;
 
     INIT_LIST_HEAD(&sample_head);
 
     element_t *samples = malloc(sizeof(*samples) * SAMPLES);
     element_t *warmdata = malloc(sizeof(*warmdata) * SAMPLES);
     element_t *testdata = malloc(sizeof(*testdata) * SAMPLES);
+    test_t *test;
+    for(int i = 0; i < EXP_CNT; i++){
+        test = tests;
+        int a = 0;
+        create_sample(&sample_head, samples, nums);
+        while (test->impl) {
+            if(EXP_CNT == 1)
+                printf("==== Testing %s ====\n", test->name);
+            /* Warm up */
+            INIT_LIST_HEAD(&warmdata_head);
+            INIT_LIST_HEAD(&testdata_head);
+            copy_list(&sample_head, &testdata_head, testdata);
+            copy_list(&sample_head, &warmdata_head, warmdata);
+            test->impl(&count, &warmdata_head, compare);
 
-    create_sample(&sample_head, samples, nums);
-
-    while (test->impl) {
-        printf("==== Testing %s ====\n", test->name);
-        /* Warm up */
-        INIT_LIST_HEAD(&warmdata_head);
-        INIT_LIST_HEAD(&testdata_head);
-        copy_list(&sample_head, &testdata_head, testdata);
-        copy_list(&sample_head, &warmdata_head, warmdata);
-        test->impl(&count, &warmdata_head, compare);
-
-        /* Test */
-        count = 0;
-        test->impl(&count, &testdata_head, compare);
-        printf("  Comparisons:    %d\n", count);
-        printf("  List is %s\n",
-               check_list(&testdata_head, nums) ? "sorted" : "not sorted");
-        test++;
+            /* Test */
+            count = 0;
+            test->impl(&count, &testdata_head, compare);
+            if(EXP_CNT == 1){
+            printf("  Comparisons:    %d\n", count);
+            printf("  List is %s\n",
+                check_list(&testdata_head, nums) ? "sorted" : "not sorted");
+            }
+            stats[a][i] = count;
+            test++;
+            a++;
+        }
     }
 
+    FILE *stat_res = fopen("stat_res.txt", "w");
+    test = tests;
+    for(int i = 0; i < 3; i++){
+        fprintf(stat_res, "\n%s:\n", test->name);
+        for(int j = 0; j < EXP_CNT; j++){
+            fprintf(stat_res, "%d ", stats[i][j]);
+        }
+        test++;
+    }
+    fclose(stat_res);
     return 0;
 }
