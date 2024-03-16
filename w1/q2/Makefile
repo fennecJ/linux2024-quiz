@@ -1,2 +1,2 @@
 all:
-	gcc main.c -o sort
+	gcc -g main.c -o sort

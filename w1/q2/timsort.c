@@ -1,9 +1,12 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #include "list.h"
 #include "sort_impl.h"
+#include "def.h"
+// #include "def.h"
 
 static inline size_t run_size(struct list_head *head)
 {
@@ -227,7 +230,7 @@ void timsort(void *priv, struct list_head *head, list_cmp_func_t cmp)
 }
 
 static inline size_t ilog2(size_t x){
-    return 31 - __builtin_clzl(x);
+    return (size_t) (31 - __builtin_clz(x));
 }
 
 static inline size_t run_size_max(struct list_head* h1, struct list_head* h2){
@@ -276,6 +279,77 @@ void adaptive_ShiversSort(void *priv, struct list_head *head, list_cmp_func_t cm
 
     /* End of input; merge together all the runs. */
     tp = merge_force_collapse(priv, cmp, tp);
+
+    /* The final merge; rebuild prev links */
+    struct list_head *stk0 = tp, *stk1 = stk0->prev;
+    while (stk1 && stk1->prev)
+        stk0 = stk0->prev, stk1 = stk1->prev;
+    if (stk_size <= 1) {
+        build_prev_link(head, head, stk0);
+        return;
+    }
+    merge_final(priv, cmp, head, stk1, stk0);
+}
+
+static inline size_t nodePower(struct list_head *h1, struct list_head *h2, 
+                                size_t start_A, size_t len)
+{
+    if(!h1 || !h2){
+        return 0;
+    }
+    size_t len_2 = len << 1;
+    size_t start_B = start_A + run_size(h1);
+    size_t end_B = start_B + run_size(h2);
+    size_t l = start_A + start_B;
+    size_t r = start_B + end_B + 1;
+    int a = (int)((l << 31) / len_2);
+    int b = (int)((r << 31) / len_2);
+    return __builtin_clz(a ^ b);
+}
+
+static size_t prev_power = 0;
+static size_t pow_stack[100][2] = {0};
+
+static struct list_head *merge_collapse_power(void *priv,
+                                        list_cmp_func_t cmp,
+                                        struct list_head *tp,
+                                        size_t tp_power)
+{
+    while (pow_stack[stk_size-1][0] > tp_power) {
+        tp->prev = merge_at(priv, cmp, tp->prev);
+    }
+    pow_stack[stk_size][0] = tp_power;
+    return tp;
+}
+
+void power_sort(void *priv, struct list_head *head, list_cmp_func_t cmp){
+    stk_size = 0;
+    size_t start_A = 0;
+    struct list_head *list = head->next, *tp = NULL;
+    if (head == head->prev)
+        return;
+
+    /* Convert to a null-terminated singly-linked list. */
+    head->prev->next = NULL;
+    do {
+        start_A += run_size(tp);
+        /* Find next run */
+        struct pair result = find_run(priv, list, cmp);
+        result.head->prev = tp;
+        tp = result.head;
+        list = result.next;
+        pow_stack[stk_size][1] = start_A;
+        if(stk_size) {
+            size_t tp_power = nodePower(tp->prev, tp, pow_stack[stk_size-1][1], SAMPLES);
+            tp = merge_collapse_power(priv, cmp, tp, tp_power);
+        }
+        stk_size++;
+    } while (list);
+
+    /* End of input; merge together all the runs. */
+    while (stk_size >= 2) {
+        tp = merge_at(priv, cmp, tp);
+    }
 
     /* The final merge; rebuild prev links */
     struct list_head *stk0 = tp, *stk1 = stk0->prev;
