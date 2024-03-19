@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "list.h"
 #include "sort_impl.h"
@@ -13,7 +14,7 @@ typedef struct {
     int seq;
 } element_t;
 
-static int stats[3][EXP_CNT] = {0};
+stat_t stats[3][EXP_CNT] = {0};
 
 static void create_sample(struct list_head *head, element_t *space, int samples)
 {
@@ -50,16 +51,17 @@ int compare(void *priv, const struct list_head *a, const struct list_head *b)
     int res = list_entry(a, element_t, list)->val -
               list_entry(b, element_t, list)->val;
 
-    if (priv)
-        *((int *) priv) += 1;
+    if (priv){
+        ((stat_t*) priv)-> compare += 1;
+    }
 
     return res;
 }
 
-bool check_list(struct list_head *head, int count)
+bool check_list(struct list_head *head, int statistic)
 {
     if (list_empty(head))
-        return 0 == count;
+        return 0 == statistic;
 
     element_t *entry, *safe;
     size_t ctr = 0;
@@ -101,7 +103,7 @@ typedef struct {
 int main(void)
 {
     struct list_head sample_head, warmdata_head, testdata_head;
-    int count;
+    stat_t statistic;
     int nums = SAMPLES;
 
     /* Assume ASLR */
@@ -132,31 +134,44 @@ int main(void)
             INIT_LIST_HEAD(&testdata_head);
             copy_list(&sample_head, &testdata_head, testdata);
             copy_list(&sample_head, &warmdata_head, warmdata);
-            test->impl(&count, &warmdata_head, compare);
+            test->impl(&statistic, &warmdata_head, compare);
 
             /* Test */
-            count = 0;
-            test->impl(&count, &testdata_head, compare);
+            statistic.compare = 0;
+            statistic.max_run = 0;
+            double start_time = clock() / (double) CLOCKS_PER_SEC;
+            test->impl(&statistic, &testdata_head, compare);
+            double end_time = clock() / (double) CLOCKS_PER_SEC;
+            
             if(EXP_CNT == 1){
-            printf("  Comparisons:    %d\n", count);
-            printf("  List is %s\n",
+                printf("  Comparisons:    %d\n", statistic.compare);
+                printf("  List is %s\n",
                 check_list(&testdata_head, nums) ? "sorted" : "not sorted");
+            } else if(!check_list(&testdata_head, nums)) {
+                printf("Error: %s is not stable\n", test->name);
             }
-            stats[a][i] = count;
+            statistic.time = end_time - start_time;
+            stats[a][i] = statistic;
             test++;
             a++;
         }
     }
 
-    FILE *stat_res = fopen("stat_res.txt", "w");
+    FILE *cmp_res = fopen("cmp_res.txt", "w");
+    FILE *max_run_res = fopen("max_run_res.txt", "w");
+    FILE *time_res = fopen("time_res.txt", "w");
     test = tests;
     for(int i = 0; i < 3; i++){
-        fprintf(stat_res, "\n%s:\n", test->name);
+        fprintf(cmp_res, "\n%s:\n", test->name);
+        fprintf(max_run_res, "\n%s:\n", test->name);
+        fprintf(time_res, "\n%s:\n", test->name);
         for(int j = 0; j < EXP_CNT; j++){
-            fprintf(stat_res, "%d ", stats[i][j]);
+            fprintf(cmp_res, "%d ", stats[i][j].compare);
+            fprintf(max_run_res, "%ld ", stats[i][j].max_run);
+            fprintf(time_res, "%f ", stats[i][j].time);
         }
         test++;
     }
-    fclose(stat_res);
+    fclose(cmp_res);
     return 0;
 }
