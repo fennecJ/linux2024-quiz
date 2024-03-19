@@ -44,7 +44,7 @@ def draw_pic(res_file, config_file, exp_name):
     max_length = max(len(values) for values in data.values())
     x = list(range(1, max_length + 1))
 
-    fig_width = max_length * 0.025
+    fig_width = max_length * 0.02
 
     # print(fig_width, plt.gcf().get_figwidth())
     plt.figure(figsize=(fig_width, fig_width * 0.3))
@@ -58,11 +58,11 @@ def draw_pic(res_file, config_file, exp_name):
             plt.scatter(x[:len(values)], values, label=algorithm, marker=markers[i], s=60, facecolors=colors[i])
 
 
-    plt.xlabel('Experiment')
-    plt.ylabel(exp_name)
-    plt.title(f'Samples = {sample}')
-    plt.legend()
-
+    plt.xlabel('Experiment', fontsize=20)
+    plt.ylabel(exp_name, fontsize=20)
+    plt.title(f'Samples = {sample}', fontsize=32)
+    plt.legend(fontsize=16)
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
     plt.savefig('stat_plot/' + exp_name + '_' + str(sample) + '.png')
 
 
