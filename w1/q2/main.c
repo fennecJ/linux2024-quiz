@@ -116,13 +116,14 @@ int main(void)
         {NULL, NULL},
     };
 
-    INIT_LIST_HEAD(&sample_head);
 
     element_t *samples = malloc(sizeof(*samples) * SAMPLES);
     element_t *warmdata = malloc(sizeof(*warmdata) * SAMPLES);
     element_t *testdata = malloc(sizeof(*testdata) * SAMPLES);
     test_t *test;
+
     for(int i = 0; i < EXP_CNT; i++){
+        INIT_LIST_HEAD(&sample_head);
         test = tests;
         int a = 0;
         create_sample(&sample_head, samples, nums);
@@ -148,7 +149,7 @@ int main(void)
                 printf("  List is %s\n",
                 check_list(&testdata_head, nums) ? "sorted" : "not sorted");
             } else if(!check_list(&testdata_head, nums)) {
-                printf("Error: %s is not stable\n", test->name);
+                printf("Error: %s has sort error\n", test->name);
             }
             statistic.time = end_time - start_time;
             stats[a][i] = statistic;
