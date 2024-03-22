@@ -23,6 +23,7 @@ static void create_sample(struct list_head *head, element_t *space, int samples)
     for (int i = 0; i < samples; i++) {
         element_t *elem = space + i;
         elem->val = rand();
+        elem->seq = i;
         list_add_tail(&elem->list, head);
     }
 }
