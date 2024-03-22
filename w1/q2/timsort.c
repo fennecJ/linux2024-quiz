@@ -240,7 +240,7 @@ void timsort(void *priv, struct list_head *head, list_cmp_func_t cmp)
 }
 
 static inline size_t ilog2(size_t x){
-    return (size_t) (31 - __builtin_clz(x));
+    return (size_t) (63 - __builtin_clzl(x));
 }
 
 
