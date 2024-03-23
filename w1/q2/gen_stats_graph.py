@@ -45,9 +45,9 @@ def draw_pic(res_file, config_file, exp_name):
     x = list(range(1, max_length + 1))
 
     fig_width = max_length * 0.02
-
+    if fig_width > 200:
+        plt.figure(figsize=(fig_width, fig_width * 0.3))
     # print(fig_width, plt.gcf().get_figwidth())
-    plt.figure(figsize=(fig_width, fig_width * 0.3))
 
     markers = ['+', 'x', '^']
     colors = ['r', 'y', 'black']
