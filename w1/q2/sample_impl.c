@@ -81,7 +81,7 @@ void create_sample_rnd3(struct list_head *head, element_t *space, int samples)
         list_add_tail(&elem->list, head);
     }
     // perform 3 shuffle
-    for(int i = 0; i < samples; i += 3){
+    for(int i = 0; i <= samples; i += 3){
         /**
          * Shuffel only first and second (123 -> 213) or second and third (123 -> 132)
          * Original order is ABC
