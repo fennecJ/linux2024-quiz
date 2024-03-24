@@ -165,8 +165,14 @@ static struct list_head *merge_force_collapse(void *priv,
 {
     while (stk_size >= 3) {
         if (run_size(tp->prev->prev) < run_size(tp)) {
+            size_t max_run = run_size_max(tp->prev->prev, tp->prev);
+            if(priv && ((stat_t*)priv)->max_run < max_run)
+                ((stat_t*)priv)->max_run = max_run;
             tp->prev = merge_at(priv, cmp, tp->prev);
         } else {
+            size_t max_run = run_size_max(tp->prev, tp);
+            if(priv && ((stat_t*)priv)->max_run < max_run)
+                ((stat_t*)priv)->max_run = max_run;
             tp = merge_at(priv, cmp, tp);
         }
     }
