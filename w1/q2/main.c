@@ -6,27 +6,13 @@
 
 #include "list.h"
 #include "sort_impl.h"
+#include "sample_impl.h"
 #include "def.h"
 
-typedef struct {
-    struct list_head list;
-    int val;
-    int seq;
-} element_t;
 
 stat_t stats[3][EXP_CNT] = {0};
 
-static void create_sample(struct list_head *head, element_t *space, int samples)
-{
-    if(EXP_CNT == 1)
-        printf("Creating sample\n");
-    for (int i = 0; i < samples; i++) {
-        element_t *elem = space + i;
-        elem->val = rand();
-        elem->seq = i;
-        list_add_tail(&elem->list, head);
-    }
-}
+
 
 static void copy_list(struct list_head *from,
                       struct list_head *to,
@@ -101,6 +87,12 @@ typedef struct {
     test_func_t impl;
 } test_t;
 
+typedef void (*sample_func_t)(struct list_head *head, element_t *space, int samples);
+typedef struct {
+    char *name;
+    sample_func_t impl;
+} sample_t;
+
 int main(void)
 {
     struct list_head sample_head, warmdata_head, testdata_head;
@@ -116,64 +108,96 @@ int main(void)
         {.name = "powerSort", .impl = power_sort},
         {NULL, NULL},
     };
+    sample_t samples_creators[] = {
+        {.name = "sample_rnd", .impl = create_sample_rnd},
+        {.name = "sample_des_strict", .impl = create_sample_descend_strict},
+        {.name = "sample_des", .impl = create_sample_descend},
+        {.name = "sample_as_strict", .impl = create_sample_ascend_strict},
+        {.name = "sample_des", .impl = create_sample_ascend},
+        {.name = "sample_rnd3", .impl = create_sample_rnd3},
+        {.name = "sample_as_10", .impl = create_sample_ascend_10},
+        {.name = "sample_rnd_1Percent", .impl = create_sample_rnd_1_percent},
+        {.name = "sample_dup", .impl = create_sample_dup},
+        {.name = "sample_samp", .impl = create_sample_same},
+        {NULL, NULL},
+    };
 
 
     element_t *samples = malloc(sizeof(*samples) * SAMPLES);
     element_t *warmdata = malloc(sizeof(*warmdata) * SAMPLES);
     element_t *testdata = malloc(sizeof(*testdata) * SAMPLES);
     test_t *test;
+    sample_t *create_sample = samples_creators;
+    while (create_sample->impl) {
+    
+        for(int i = 0; i < EXP_CNT; i++){
+            INIT_LIST_HEAD(&sample_head);
+            test = tests;
+            int a = 0;
+            create_sample->impl(&sample_head, samples, nums);
 
-    for(int i = 0; i < EXP_CNT; i++){
-        INIT_LIST_HEAD(&sample_head);
-        test = tests;
-        int a = 0;
-        create_sample(&sample_head, samples, nums);
-        while (test->impl) {
-            if(EXP_CNT == 1)
-                printf("==== Testing %s ====\n", test->name);
-            /* Warm up */
-            INIT_LIST_HEAD(&warmdata_head);
-            INIT_LIST_HEAD(&testdata_head);
-            copy_list(&sample_head, &testdata_head, testdata);
-            copy_list(&sample_head, &warmdata_head, warmdata);
-            test->impl(&statistic, &warmdata_head, compare);
+            while (test->impl) {
+                if(EXP_CNT == 1)
+                    printf("==== Testing %s with %s ====\n", test->name, create_sample->name);
+                /* Warm up */
+                INIT_LIST_HEAD(&warmdata_head);
+                INIT_LIST_HEAD(&testdata_head);
+                copy_list(&sample_head, &testdata_head, testdata);
+                copy_list(&sample_head, &warmdata_head, warmdata);
+                test->impl(&statistic, &warmdata_head, compare);
 
-            /* Test */
-            statistic.compare = 0;
-            statistic.max_run = 0;
-            double start_time = clock() / (double) CLOCKS_PER_SEC;
-            test->impl(&statistic, &testdata_head, compare);
-            double end_time = clock() / (double) CLOCKS_PER_SEC;
-            
-            if(EXP_CNT == 1){
-                printf("  Comparisons:    %d\n", statistic.compare);
-                printf("  List is %s\n",
-                check_list(&testdata_head, nums) ? "sorted" : "not sorted");
-            } else if(!check_list(&testdata_head, nums)) {
-                printf("Error: %s has sort error\n", test->name);
+                /* Test */
+                statistic.compare = 0;
+                statistic.max_run = 0;
+                double start_time = clock() / (double) CLOCKS_PER_SEC;
+                test->impl(&statistic, &testdata_head, compare);
+                double end_time = clock() / (double) CLOCKS_PER_SEC;
+                
+                if(EXP_CNT == 1){
+                    printf("  Comparisons:    %d\n", statistic.compare);
+                    printf("  List is %s\n",
+                    check_list(&testdata_head, nums) ? "sorted" : "not sorted");
+                } else if(!check_list(&testdata_head, nums)) {
+                    printf("Error: %s has sort error in %s\n", test->name, create_sample->name);
+                }
+                statistic.time = end_time - start_time;
+                stats[a][i] = statistic;
+                test++;
+                a++;
             }
-            statistic.time = end_time - start_time;
-            stats[a][i] = statistic;
-            test++;
-            a++;
         }
+        char cmp_file[40];
+        char max_run_file[40];
+        char time_file[40];
+        sprintf(cmp_file, "cmp_res_%s.txt", create_sample->name);
+        sprintf(max_run_file, "max_run_res_%s.txt", create_sample->name);
+        sprintf(time_file, "time_res_%s.txt", create_sample->name);
+
+        FILE *cmp_res = fopen(cmp_file, "w");
+        FILE *max_run_res = fopen(max_run_file, "w");
+        FILE *time_res = fopen(time_file, "w");
+        test = tests;
+        for(int i = 0; i < 3; i++){
+            fprintf(cmp_res, "\n%s:\n", test->name);
+            fprintf(max_run_res, "\n%s:\n", test->name);
+            fprintf(time_res, "\n%s:\n", test->name);
+            for(int j = 0; j < EXP_CNT; j++){
+                fprintf(cmp_res, "%d ", stats[i][j].compare);
+                fprintf(max_run_res, "%ld ", stats[i][j].max_run);
+                fprintf(time_res, "%f ", stats[i][j].time);
+
+                // reset for next sample 
+                stats[i][j].compare = 0;
+                stats[i][j].max_run = 0;
+                stats[i][j].time = 0.0;
+            }
+            test++;
+        }
+        fclose(cmp_res);
+        fclose(max_run_res);
+        fclose(time_res);
+        create_sample++;
     }
 
-    FILE *cmp_res = fopen("cmp_res.txt", "w");
-    FILE *max_run_res = fopen("max_run_res.txt", "w");
-    FILE *time_res = fopen("time_res.txt", "w");
-    test = tests;
-    for(int i = 0; i < 3; i++){
-        fprintf(cmp_res, "\n%s:\n", test->name);
-        fprintf(max_run_res, "\n%s:\n", test->name);
-        fprintf(time_res, "\n%s:\n", test->name);
-        for(int j = 0; j < EXP_CNT; j++){
-            fprintf(cmp_res, "%d ", stats[i][j].compare);
-            fprintf(max_run_res, "%ld ", stats[i][j].max_run);
-            fprintf(time_res, "%f ", stats[i][j].time);
-        }
-        test++;
-    }
-    fclose(cmp_res);
     return 0;
 }
