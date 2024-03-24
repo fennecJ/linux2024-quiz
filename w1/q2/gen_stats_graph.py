@@ -45,7 +45,7 @@ def draw_pic(res_file, config_file, exp_name):
     x = list(range(1, max_length + 1))
 
     fig_width = max_length * 0.02
-    if fig_width > 200:
+    if max_length > 200:
         plt.figure(figsize=(fig_width, fig_width * 0.3))
     # print(fig_width, plt.gcf().get_figwidth())
 
@@ -66,10 +66,24 @@ def draw_pic(res_file, config_file, exp_name):
     plt.savefig('stat_plot/' + exp_name + '_' + str(sample) + '.png')
 
 
-cmp_res_file = "./cmp_res.txt"
-time_res_file = "./time_res.txt"
-max_run_res_file = "./max_run_res.txt"
+implmented_sample_gen = [        
+        "sample_rnd",
+        "sample_des_strict",
+        "sample_des",
+        "sample_as_strict",
+        "sample_as",
+        "sample_rnd3",
+        "sample_as_10",
+        "sample_rnd_1Percent",
+        "sample_dup",
+        "sample_same"
+    ]
+
 config_file = "./def.h"
-draw_pic(cmp_res_file, config_file, 'Comparisons')
-draw_pic(time_res_file, config_file, 'Time')
-draw_pic(max_run_res_file, config_file, 'max_run_Len')
+for i in implmented_sample_gen:
+    cmp_res_file = "./cmp_res_" + i + ".txt"
+    time_res_file = "./time_res_" + i + ".txt"
+    max_run_res_file = "./max_run_res_" + i + ".txt"
+    draw_pic(max_run_res_file, config_file, 'max_run_Len_' + i)
+    draw_pic(time_res_file, config_file, 'Time_' + i)
+    draw_pic(cmp_res_file, config_file, 'Comparisons_' + i)
