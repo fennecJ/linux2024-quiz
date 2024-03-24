@@ -112,8 +112,8 @@ int main(void)
         {.name = "sample_rnd", .impl = create_sample_rnd},
         {.name = "sample_des_strict", .impl = create_sample_descend_strict},
         {.name = "sample_des", .impl = create_sample_descend},
-        {.name = "sample_as_strict", .impl = create_sample_ascend_strict},
-        {.name = "sample_as", .impl = create_sample_ascend},
+        // {.name = "sample_as_strict", .impl = create_sample_ascend_strict}, // ascend order has no need to compare, cause sort will be done in find_run
+        // {.name = "sample_as", .impl = create_sample_ascend},
         {.name = "sample_rnd3", .impl = create_sample_rnd3},
         {.name = "sample_as_10", .impl = create_sample_ascend_10},
         {.name = "sample_rnd_1Percent", .impl = create_sample_rnd_1_percent},
