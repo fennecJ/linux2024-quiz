@@ -64,19 +64,21 @@ def draw_pic(res_file, config_file, exp_name):
     plt.legend(fontsize=16)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
     plt.savefig('stat_plot/' + exp_name + '_' + str(sample) + '.png')
+    plt.close()
 
 
 implmented_sample_gen = [        
-        "sample_rnd",
-        "sample_des_strict",
-        "sample_des",
-        # "sample_as_strict",
-        # "sample_as",
-        "sample_rnd3",
-        "sample_as_10",
-        "sample_rnd_1Percent",
-        "sample_dup",
-        "sample_same"
+        "rnd",
+        "des_strict",
+        "des",
+        # "as_strict",
+        # "as",
+        "rnd3",
+        "as_10",
+        "rnd_1Percent",
+        "dup",
+        "same",
+        "worst"
     ]
 
 config_file = "./def.h"

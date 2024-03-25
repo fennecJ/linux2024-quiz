@@ -1,5 +1,5 @@
 #include <stdio.h>
-#define SAMPLES 16000
+#define SAMPLES 32768
 #define EXP_CNT 1000
 
 typedef struct {

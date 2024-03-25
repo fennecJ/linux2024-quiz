@@ -109,16 +109,17 @@ int main(void)
         {NULL, NULL},
     };
     sample_t samples_creators[] = {
-        {.name = "sample_rnd", .impl = create_sample_rnd},
-        {.name = "sample_des_strict", .impl = create_sample_descend_strict},
-        {.name = "sample_des", .impl = create_sample_descend},
+        {.name = "rnd", .impl = create_sample_rnd},
+        {.name = "des_strict", .impl = create_sample_descend_strict},
+        {.name = "des", .impl = create_sample_descend},
         // {.name = "sample_as_strict", .impl = create_sample_ascend_strict}, // ascend order has no need to compare, cause sort will be done in find_run
         // {.name = "sample_as", .impl = create_sample_ascend},
-        {.name = "sample_rnd3", .impl = create_sample_rnd3},
-        {.name = "sample_as_10", .impl = create_sample_ascend_10},
-        {.name = "sample_rnd_1Percent", .impl = create_sample_rnd_1_percent},
-        {.name = "sample_dup", .impl = create_sample_dup},
-        {.name = "sample_same", .impl = create_sample_same},
+        {.name = "rnd3", .impl = create_sample_rnd3},
+        {.name = "as_10", .impl = create_sample_ascend_10},
+        {.name = "rnd_1Percent", .impl = create_sample_rnd_1_percent},
+        {.name = "dup", .impl = create_sample_dup},
+        {.name = "same", .impl = create_sample_same},
+        {.name = "worst", .impl = create_sample_worst},
         {NULL, NULL},
     };
 

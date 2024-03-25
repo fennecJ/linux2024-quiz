@@ -239,3 +239,57 @@ void create_sample_same(struct list_head *head, element_t *space, int samples)
         list_add_tail(&elem->list, head);
     }
 }
+
+void create_sample_worst(struct list_head *head, element_t *space, int samples){
+    int *arr = malloc(sizeof(int)* samples);
+    for(int i = 0; i < samples; i++)
+        arr[i] = i;
+    shuffle_worst(arr, samples);
+    
+    for(int i = 0; i < samples; i++){
+        element_t *elem = space + i;
+        elem->val = arr[i];
+        elem->seq = i;
+        list_add_tail(&elem->list, head);
+    }
+
+    free(arr);
+}
+
+// given a sorted array, shuffle to worst case for merge sort
+// ref - https://stackoverflow.com/questions/24594112/when-will-the-worst-case-of-merge-sort-occur
+void shuffle_worst(int* arr, int arr_len) { 
+    if(arr_len <= 1)
+        return;
+
+    if(arr_len == 2)
+    {
+        int swap= arr[0];
+        arr[0] = arr[1];
+        arr[1] = swap;
+        return;
+    }
+
+    int m = (arr_len + 1) >> 1;
+    int *left = malloc(sizeof(int) * m);
+    int *right= malloc(sizeof(int) * (arr_len - m));
+
+    for(int i = 0, j = 0; i < arr_len; i += 2, j++)
+        left[j] = arr[i];
+
+    for(int i = 1, j = 0; i < arr_len; i += 2, j++)
+        right[j] = arr[i];
+
+    shuffle_worst(left, m);
+    shuffle_worst(right, arr_len - m);
+
+    int i, j;
+    for(i = 0; i < m; i++)
+        arr[i] = left[i];
+    for(int j = 0; j < (arr_len - m); j++){
+        arr[i++] = right[j];
+    }
+
+    free(left);
+    free(right);
+}

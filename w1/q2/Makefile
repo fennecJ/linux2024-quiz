@@ -24,6 +24,6 @@ compare: all
 	fi
 
 clean:
-	rm -f $(OBJ) sort
+	rm -f $(OBJ) sort *.txt
 
 .PHONY: all compare clean
