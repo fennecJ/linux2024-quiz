@@ -30,8 +30,8 @@ void create_sample_descend(struct list_head *head, element_t *space, int samples
     for (int i = 0; i < samples; i++) {
         element_t *elem = space + i;
         // 25% chance not change k
-        // 00, 01, 10, 11, only 11 will maintain the value
-        if(!(rand() & 3))
+        // 00, 01, 10, 11, only 00 will maintain the value
+        if(rand() & 3)
             k = samples - i;
         elem->val = k;
         elem->seq = i;
@@ -57,8 +57,8 @@ void create_sample_ascend(struct list_head *head, element_t *space, int samples)
     for (int i = 0; i < samples; i++) {
         element_t *elem = space + i;
         // 25% chance not change k
-        // 00, 01, 10, 11, only 11 will maintain the value
-        if(!(rand() & 3))
+        // 00, 01, 10, 11, only 00 will maintain the value
+        if(rand() & 3)
             k = i;
         elem->val = k;
         elem->seq = i;
