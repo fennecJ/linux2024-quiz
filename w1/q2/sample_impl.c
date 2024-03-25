@@ -283,7 +283,7 @@ void shuffle_worst(int* arr, int arr_len) {
     shuffle_worst(left, m);
     shuffle_worst(right, arr_len - m);
 
-    int i, j;
+    int i;
     for(i = 0; i < m; i++)
         arr[i] = left[i];
     for(int j = 0; j < (arr_len - m); j++){

@@ -69,15 +69,15 @@ def draw_pic(res_file, config_file, exp_name):
 
 implmented_sample_gen = [        
         "rnd",
-        "des_strict",
+        # "des_strict",
         "des",
         # "as_strict",
-        # "as",
+        "as",
         "rnd3",
         "as_10",
         "rnd_1Percent",
         "dup",
-        "same",
+        # "same",
         "worst"
     ]
 
