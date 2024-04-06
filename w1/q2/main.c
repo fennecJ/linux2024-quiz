@@ -10,7 +10,7 @@
 #include "def.h"
 
 
-stat_t stats[3][EXP_CNT] = {0};
+stat_t stats[4][EXP_CNT] = {0};
 
 
 
@@ -106,6 +106,7 @@ int main(void)
         {.name = "timsort", .impl = timsort},
         {.name = "adaptive_ShiversSort", .impl = adaptive_ShiversSort},
         {.name = "powerSort", .impl = power_sort},
+        {.name = "listSort", .impl = list_sort},
         {NULL, NULL},
     };
     sample_t samples_creators[] = {
@@ -178,7 +179,7 @@ int main(void)
         FILE *max_run_res = fopen(max_run_file, "w");
         FILE *time_res = fopen(time_file, "w");
         test = tests;
-        for(int i = 0; i < 3; i++){
+        for(int i = 0; i < 4; i++){
             fprintf(cmp_res, "\n%s:\n", test->name);
             fprintf(max_run_res, "\n%s:\n", test->name);
             fprintf(time_res, "\n%s:\n", test->name);

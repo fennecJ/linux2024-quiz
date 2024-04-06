@@ -12,4 +12,6 @@ void timsort(void *priv, struct list_head *head, list_cmp_func_t cmp);
 void adaptive_ShiversSort(void *priv, struct list_head *head, list_cmp_func_t cmp);
 
 void power_sort(void *priv, struct list_head *head, list_cmp_func_t cmp);
+
+void list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp);
 #endif // !_SORT_IMPL_

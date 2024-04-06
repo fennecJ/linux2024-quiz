@@ -49,10 +49,10 @@ def draw_pic(res_file, config_file, exp_name):
         plt.figure(figsize=(fig_width, fig_width * 0.3))
     # print(fig_width, plt.gcf().get_figwidth())
 
-    markers = ['+', 'x', '^']
-    colors = ['r', 'y', 'black']
+    markers = ['+', 'x', '^', 'o']
+    colors = ['r', 'y', 'black', 'blue']
     for i, (algorithm, values) in enumerate(data.items()):
-        if(markers[i] == '^'):
+        if(markers[i] == '^' or markers[i] == 'o'):
             plt.scatter(x[:len(values)], values, label=algorithm, marker=markers[i], s=60, facecolors='none', edgecolors=colors[i])
         else:
             plt.scatter(x[:len(values)], values, label=algorithm, marker=markers[i], s=60, facecolors=colors[i])
