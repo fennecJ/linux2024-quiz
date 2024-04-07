@@ -97,6 +97,7 @@ int main(void)
 {
     struct list_head sample_head, warmdata_head, testdata_head;
     stat_t statistic;
+    stat_t max_stat = {0, 0, 0.0};
     int nums = SAMPLES;
 
     /* Assume ASLR */
@@ -164,6 +165,14 @@ int main(void)
                 }
                 statistic.time = end_time - start_time;
                 stats[a][i] = statistic;
+
+                max_stat.compare = (statistic.compare > max_stat.compare) ? 
+                                    statistic.compare : max_stat.compare;                
+                max_stat.max_run = (statistic.max_run > max_stat.max_run) ? 
+                                    statistic.max_run : max_stat.max_run;
+                max_stat.time = (statistic.time > max_stat.time) ? 
+                                 statistic.time : max_stat.time;
+
                 test++;
                 a++;
             }
@@ -175,9 +184,15 @@ int main(void)
         sprintf(max_run_file, "max_run_res_%s.txt", create_sample->name);
         sprintf(time_file, "time_res_%s.txt", create_sample->name);
 
+        FILE *max_res = fopen("max_res.txt", "w");
         FILE *cmp_res = fopen(cmp_file, "w");
         FILE *max_run_res = fopen(max_run_file, "w");
         FILE *time_res = fopen(time_file, "w");
+
+        fprintf(max_res, "cmp: %d\n", max_stat.compare);
+        fprintf(max_res, "max_run: %lu\n", max_stat.max_run);
+        fprintf(max_res, "time: %f\n", max_stat.time);
+
         test = tests;
         for(int i = 0; i < 4; i++){
             fprintf(cmp_res, "\n%s:\n", test->name);

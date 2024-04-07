@@ -430,4 +430,6 @@ void list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
 	}
 	/* The final merge, rebuilding prev links */
 	merge_final(priv, cmp, head, pending, list);
+    if(priv)
+        ((stat_t*)priv)->max_run = 0;
 }

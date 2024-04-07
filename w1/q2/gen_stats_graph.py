@@ -4,7 +4,7 @@ import os
 if not os.path.exists('stat_plot'):
     os.makedirs('stat_plot')
 
-def draw_pic(res_file, config_file, exp_name):
+def draw_pic(res_file, config_file, exp_name, max_val):
     sample = 0
     data = {}
     with open(res_file, 'r') as file:
@@ -52,7 +52,7 @@ def draw_pic(res_file, config_file, exp_name):
     markers = ['+', 'x', '^', 'o']
     colors = ['r', 'y', 'black', 'blue']
     for i, (algorithm, values) in enumerate(data.items()):
-        if(markers[i] == '^' or markers[i] == 'o'):
+        if(markers[i] == '^' or markers[i] == 'o'): # Make icon hollowed, set facecolors to 'none'
             plt.scatter(x[:len(values)], values, label=algorithm, marker=markers[i], s=60, facecolors='none', edgecolors=colors[i])
         else:
             plt.scatter(x[:len(values)], values, label=algorithm, marker=markers[i], s=60, facecolors=colors[i])
@@ -63,6 +63,7 @@ def draw_pic(res_file, config_file, exp_name):
     plt.title(f'Samples = {sample}', fontsize=32)
     plt.legend(fontsize=16)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+    plt.ylim(0, max_val * 1.1)
     plt.savefig('stat_plot/' + exp_name + '_' + str(sample) + '.png')
     plt.close()
 
@@ -82,10 +83,25 @@ implmented_sample_gen = [
     ]
 
 config_file = "./def.h"
+max_rec_file = "./max_res.txt"
+max_rec_dict = {}
+
+with open(max_rec_file, 'r') as file:
+    for line in file:
+        key, value = line.strip().split(': ')
+        if key != 'time':
+            max_rec_dict[key] = int(value)
+        else:
+            max_rec_dict[key] = float(value)
+
+max_run_max = max_rec_dict.get('max_run')
+time_max = max_rec_dict.get('time')
+cmp_max = max_rec_dict.get("cmp")
+
 for i in implmented_sample_gen:
     cmp_res_file = "./cmp_res_" + i + ".txt"
     time_res_file = "./time_res_" + i + ".txt"
     max_run_res_file = "./max_run_res_" + i + ".txt"
-    draw_pic(max_run_res_file, config_file, 'max_run_Len_' + i)
-    draw_pic(time_res_file, config_file, 'Time_' + i)
-    draw_pic(cmp_res_file, config_file, 'Comparisons_' + i)
+    draw_pic(max_run_res_file, config_file, 'max_run_Len_' + i, max_run_max)
+    draw_pic(time_res_file, config_file, 'Time_' + i, time_max)
+    draw_pic(cmp_res_file, config_file, 'Comparisons_' + i, cmp_max)
