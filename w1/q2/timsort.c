@@ -34,6 +34,12 @@ static struct list_head *merge(void *priv,
                                struct list_head *a,
                                struct list_head *b)
 {
+    size_t a_len = run_size(a);
+    size_t b_len = run_size(b);
+    size_t max_len = (a_len > b_len) ? a_len : b_len;
+    if(priv && ((stat_t*)priv)->max_run < max_len)
+        ((stat_t*)priv)->max_run = max_len;
+
     struct list_head *head;
     struct list_head **tail = &head;
 
@@ -167,14 +173,8 @@ static struct list_head *merge_force_collapse(void *priv,
 {
     while (stk_size >= 3) {
         if (run_size(tp->prev->prev) < run_size(tp)) {
-            size_t max_run = run_size_max(tp->prev->prev, tp->prev);
-            if(priv && ((stat_t*)priv)->max_run < max_run)
-                ((stat_t*)priv)->max_run = max_run;
             tp->prev = merge_at(priv, cmp, tp->prev);
         } else {
-            size_t max_run = run_size_max(tp->prev, tp);
-            if(priv && ((stat_t*)priv)->max_run < max_run)
-                ((stat_t*)priv)->max_run = max_run;
             tp = merge_at(priv, cmp, tp);
         }
     }
@@ -192,14 +192,8 @@ static struct list_head *merge_collapse(void *priv,
             (n >= 4 && run_size(tp->prev->prev->prev) <=
                            run_size(tp->prev->prev) + run_size(tp->prev))) {
             if (run_size(tp->prev->prev) < run_size(tp)) {
-                size_t max_run = run_size_max(tp->prev->prev, tp->prev);
-                if(priv && ((stat_t*)priv)->max_run < max_run)
-                    ((stat_t*)priv)->max_run = max_run;
                 tp->prev = merge_at(priv, cmp, tp->prev);
             } else {
-                size_t max_run = run_size_max(tp->prev, tp);
-                if(priv && ((stat_t*)priv)->max_run < max_run)
-                    ((stat_t*)priv)->max_run = max_run;
                 tp = merge_at(priv, cmp, tp);
             }
         } else if (run_size(tp->prev) <= run_size(tp)) {
@@ -260,17 +254,8 @@ static struct list_head *merge_collapse_ass(void *priv,
     while ((n = stk_size) >= 2) {
         if (n >= 3 && 
             ilog2(run_size(tp->prev->prev)) <= ilog2(run_size_max(tp->prev, tp))) {
-            size_t max_run = run_size_max(tp, tp->prev);
-            if(priv && ((stat_t*)priv)->max_run < max_run)
-                ((stat_t*)priv)->max_run = max_run;
-            
             tp->prev = merge_at(priv, cmp, tp->prev);
-
-
         } else if (run_size(tp->prev) <= run_size(tp)) {
-            size_t max_run = run_size(tp);
-            if(priv && ((stat_t*)priv)->max_run < max_run)
-                ((stat_t*)priv)->max_run = max_run;
             tp = merge_at(priv, cmp, tp);
         } else {
             break;
@@ -339,9 +324,6 @@ static struct list_head *merge_collapse_power(void *priv,
                                         size_t tp_power)
 {
     while (pow_stack[stk_size-1][0] > tp_power) {
-        size_t max_run = run_size_max(tp->prev, tp->prev->prev);
-        if(priv && ((stat_t*)priv)->max_run < max_run)
-            ((stat_t*)priv)->max_run = max_run;
         tp->prev = merge_at(priv, cmp, tp->prev);
     }
     pow_stack[stk_size][0] = tp_power;
