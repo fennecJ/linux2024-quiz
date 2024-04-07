@@ -63,22 +63,23 @@ def draw_pic(res_file, config_file, exp_name, max_val):
     plt.title(f'Samples = {sample}', fontsize=32)
     plt.legend(fontsize=16)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
-    plt.ylim(0, max_val * 1.1)
+    if max_val > 0:
+        plt.ylim(0, max_val * 1.1)
     plt.savefig('stat_plot/' + exp_name + '_' + str(sample) + '.png')
     plt.close()
 
 
 implmented_sample_gen = [        
         "rnd",
-        # "des_strict",
+        "des_strict",
         "des",
-        # "as_strict",
+        "as_strict",
         "as",
         "rnd3",
         "as_10",
         "rnd_1Percent",
         "dup",
-        # "same",
+        "same",
         "worst"
     ]
 
@@ -97,6 +98,10 @@ with open(max_rec_file, 'r') as file:
 max_run_max = max_rec_dict.get('max_run')
 time_max = max_rec_dict.get('time')
 cmp_max = max_rec_dict.get("cmp")
+
+max_run_max = 0
+time_max = 0
+cmp_max = 0
 
 for i in implmented_sample_gen:
     cmp_res_file = "./cmp_res_" + i + ".txt"

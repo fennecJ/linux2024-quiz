@@ -112,15 +112,15 @@ int main(void)
     };
     sample_t samples_creators[] = {
         {.name = "rnd", .impl = create_sample_rnd},
-        // {.name = "des_strict", .impl = create_sample_descend_strict},  // strict order has no need to compare, cause sort will be done in find_run
+        {.name = "des_strict", .impl = create_sample_descend_strict},  // strict order has no need to compare, cause sort will be done in find_run
         {.name = "des", .impl = create_sample_descend},
-        // {.name = "sample_as_strict", .impl = create_sample_ascend_strict}, // strict order has no need to compare, cause sort will be done in find_run
+        {.name = "as_strict", .impl = create_sample_ascend_strict}, // strict order has no need to compare, cause sort will be done in find_run
         {.name = "as", .impl = create_sample_ascend},
         {.name = "rnd3", .impl = create_sample_rnd3},
         {.name = "as_10", .impl = create_sample_ascend_10},
         {.name = "rnd_1Percent", .impl = create_sample_rnd_1_percent},
         {.name = "dup", .impl = create_sample_dup},
-        // {.name = "same", .impl = create_sample_same},    // same order has no need to compare, cause sort will be done in find_run
+        {.name = "same", .impl = create_sample_same},    // same order has no need to compare, cause sort will be done in find_run
         {.name = "worst", .impl = create_sample_worst},
         {NULL, NULL},
     };
